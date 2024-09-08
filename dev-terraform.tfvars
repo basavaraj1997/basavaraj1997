@@ -1,2 +1,2 @@
-prefix= "dev-test"
-location= "East Us"
+prefix = "dev-test"
+location = "East US"
