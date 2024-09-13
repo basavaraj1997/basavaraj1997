@@ -21,22 +21,16 @@ jobs:
   terraform:        
     name: 'Terraform'
     env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      #to changet the terraform tfvars file based on the environment
       ENVIRONMENT: ${{ github.event.inputs.select-environment }}
-      #to change the terraform state file based on the environment
       STATE_FILE: ${{ github.event.inputs.select-environment }}.tfstate
       TF_VARS_FILE_Name: ''
       run: |      
-        if [[ "${{ github.event.inputs.select-environment }}" == "beezly" ]]:
-          TF_VARS_FILE_Name="terraform.tfvars"
+        if [[ "${{ github.event.inputs.select-environment }}" == "beezly" ]]:        
+            env:  TF_VARS_FILE_Name="terraform.tfvars"
         elif [[ "${{ github.event.inputs.select-environment }}" == "beezly-uat" ]]:
-          TF_VARS_FILE_Name="uat-terraform.tfvars"
+            env: TF_VARS_FILE_Name="uat-terraform.tfvars"
         elif [[ "${{ github.event.inputs.select-environment }}" == "beezly-demo" ]]:
-          TF_VARS_FILE_Name="demo-terraform.tfvars"
+            env: TF_VARS_FILE_Name="demo-terraform.tfvars"
         echo "TF_VARS_FILE_Name=$TF_VARS_FILE_Name"
         echo "ENVIRONMENT=$ENVIRONMENT"
         echo "STATE_FILE=$STATE_FILE"
