@@ -9,43 +9,36 @@ on:
         default: 'Beezly'
         type: choice
         options:
-        - beezly
-        - beezly-uat
-        - beezly-demo
+        - infra
+        - infra-uat
+        - infra-demo
 
 permissions:
   contents: read 
-      
 
 jobs:
   terraform:        
     name: 'Terraform'
-    env:
-      ENVIRONMENT: ${{ github.event.inputs.select-environment }}
-      STATE_FILE: ${{ github.event.inputs.select-environment }}.tfstate
-      TF_VARS_FILE_Name: ''
-      run: |      
-        if [[ "${{ github.event.inputs.select-environment }}" == "beezly" ]]:        
-            env:  TF_VARS_FILE_Name="terraform.tfvars"
-        elif [[ "${{ github.event.inputs.select-environment }}" == "beezly-uat" ]]:
-            env: TF_VARS_FILE_Name="uat-terraform.tfvars"
-        elif [[ "${{ github.event.inputs.select-environment }}" == "beezly-demo" ]]:
-            env: TF_VARS_FILE_Name="demo-terraform.tfvars"
-        echo "TF_VARS_FILE_Name=$TF_VARS_FILE_Name"
-        echo "ENVIRONMENT=$ENVIRONMENT"
-        echo "STATE_FILE=$STATE_FILE"
-        echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
+    runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest        
-    
     defaults:
       run:
         working-directory: artifacts/acr
         shell: bash
-    
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      
-    - name: Terraform Init
-      run: terrafom plan -var-file=${{ env.TF_VARS_FILE_Name }}
+
+    - name: Set TF_VARS_FILE_Name based on environment
+      run: |
+        if [[ "${{ github.event.inputs['select-environment'] }}" == "infra" ]]; then
+          echo "TF_VARS_FILE_Name=terraform.tfvars" >> $GITHUB_ENV
+        elif [[ "${{ github.event.inputs['select-environment'] }}" == "infra-uat" ]]; then
+          echo "TF_VARS_FILE_Name=uat-terraform.tfvars" >> $GITHUB_ENV
+        elif [[ "${{ github.event.inputs['select-environment'] }}" == "infra-demo" ]]; then
+          echo "TF_VARS_FILE_Name=demo-terraform.tfvars" >> $GITHUB_ENV
+        fi
+
+    - name: Terraform Plan
+      run: terraform plan -var-file=${{ env.TF_VARS_FILE_Name }}
